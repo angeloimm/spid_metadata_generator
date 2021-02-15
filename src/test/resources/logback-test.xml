@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<configuration scan="true">
+	<shutdownHook
+		class="ch.qos.logback.core.hook.DelayingShutdownHook" /> <!-- si occupa della chiusura dei thread rimasti attivi dopo la chiusura dell'applicazione -->
+	<appender name="consoleAppender"
+		class="ch.qos.logback.core.ConsoleAppender"> <!-- si occupa di scrivere tutti i messaggi in console -->
+		<encoder>
+			<charset>UTF-8</charset>
+			<Pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n
+			</Pattern>
+		</encoder>
+	</appender>
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>logs/test_generazione_metadata.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>
+				logs/test_generazione_metadata%d{yyyy-MM-dd}.%i.log.tar.gz <!-- estensione del file + algoritmo di compressione -->
+			</fileNamePattern>
+			<maxFileSize>6MB</maxFileSize><!-- dimensione massima per il file di log -->
+			<maxHistory>50</maxHistory><!-- numero massimo di backup dei file log -->
+			<totalSizeCap>100GB</totalSizeCap><!-- memoria occupabile nella directory assegnata ai file di log -->
+		</rollingPolicy>
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+	<!-- Appender asincroni di default -->
+	<appender name="ASYNC_consoleAppender"
+		class="ch.qos.logback.classic.AsyncAppender"> <!-- dichiarazione di appender asincroni  -->
+		<queueSize>262144</queueSize>
+		<appender-ref ref="consoleAppender" />
+	</appender>
+	<appender name="ASYNC_FILE"
+		class="ch.qos.logback.classic.AsyncAppender">
+		<queueSize>262144</queueSize>
+		<appender-ref ref="FILE" />
+	</appender>
+	<logger name="it.eng" level="TRACE">
+	</logger>
+	<root level="INFO">
+		<appender-ref ref="ASYNC_consoleAppender" />
+		<appender-ref ref="ASYNC_FILE" />
+	</root>
+</configuration>

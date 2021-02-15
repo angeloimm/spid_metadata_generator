@@ -1,0 +1,5 @@
+openssl req -new -newkey rsa:4096 -sha512 -nodes -keyout sample.key -x509 -days 3650 -out sample.crt
+
+openssl pkcs12  -export -out sample.pfx -inkey sample.key -in sample.crt -name sample
+
+pwd: esempio_certificato_sael
