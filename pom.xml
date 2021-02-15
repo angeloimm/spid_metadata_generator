@@ -5,8 +5,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.agid.spid</groupId>
 	<version>0.0.1-SNAPSHOT</version>
-	<artifactId>sp.metadata.generator</artifactId>
-	<name>sp.metadata.generator</name>
+	<artifactId>spid.library</artifactId>
+	<name>spid.library</name>
 
 	<packaging>jar</packaging>
 	<properties>
