@@ -1,0 +1,1 @@
+# spid_metadata_generator
