@@ -55,10 +55,10 @@ public class SamlGenerationTest {
 			boolean wantAssertionsSigned = true;
 			String supportedProtocol = "urn:oasis:names:tc:SAML:2.0:protocol";
 			//Carico il p12 (può avere estensione p12 o pfx) e utilizzo questo per i cerficati
-			String pwd = "esempio_certificato_sael";
+			String pwd = "esempio.certificato";
 			String alias = null;
 
-			InputStream is = new FileInputStream(new File("certificate/sample.pfx"));
+			InputStream is = new FileInputStream(new File("certificate/esempio.pfx"));
 			KeyStore ks = KeyStore.getInstance("PKCS12");
 			ks.load(is, pwd.toCharArray());
 			List<String> result = new ArrayList<String>();
@@ -133,8 +133,8 @@ public class SamlGenerationTest {
 			String alias = null;
 			String supportedProtocol = "urn:oasis:names:tc:SAML:2.0:protocol";
 			//Carico il p12 (può avere estensione p12 o pfx) e utilizzo questo per i cerficati
-			String pwd = "esempio_certificato_sael";
-			InputStream is = new FileInputStream(new File("certificate/sample.pfx"));
+			String pwd = "esempio.certificato";
+			InputStream is = new FileInputStream(new File("certificate/esempio.pfx"));
 			KeyStore ks = KeyStore.getInstance("PKCS12");
 			ks.load(is, pwd.toCharArray());
 			List<String> result = new ArrayList<String>();

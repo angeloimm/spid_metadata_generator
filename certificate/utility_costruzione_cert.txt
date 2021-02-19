@@ -1,5 +1,11 @@
-openssl req -new -newkey rsa:4096 -sha512 -nodes -keyout sample.key -x509 -days 3650 -out sample.crt
+GENERAZIONE CHIAVE E CERTIFICATO
+openssl req -new -config spid_csr.conf -newkey rsa:4096 -sha512 -nodes -keyout esempio.key -x509 -days 3650 -out esempio.crt
 
-openssl pkcs12  -export -out sample.pfx -inkey sample.key -in sample.crt -name sample
+EXPORT CHIAVE E CERTIFICATO IN PFX
+openssl pkcs12  -export -out esempio.pfx -inkey esempio.key -in esempio.crt -name esempio.certificato
 
-pwd: esempio_certificato_sael
+GENERAZIONE JKS
+keytool -importkeystore -srckeystore esempio.pfx -srcstoretype pkcs12 -destkeystore esempio.jks -deststoretype pkcs12
+
+
+PWD: esempio.certificato
