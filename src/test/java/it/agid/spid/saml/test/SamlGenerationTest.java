@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import it.agid.spid.saml.core.SpMetadataBuilder;
+import it.agid.spid.saml.core.SpSoggettoAggregatoreMetadataBuilder;
 import it.agid.spid.saml.core.dto.SamlAssertionConsumerServiceUtil;
 import it.agid.spid.saml.core.dto.SamlBindingUtils;
 import it.agid.spid.saml.core.dto.SamlFpaCessionarioCommittente;
@@ -77,8 +78,8 @@ public class SamlGenerationTest {
 			}
 			SamlBindingUtils bu = new SamlBindingUtils();
 			bu.setBindingType(SamlBindingTypes.POST);
-			bu.setLocation("https://single-loglout-url-post");
-			bu.setResponseLocation("https://single-loglout-url-post/response-location");
+			bu.setLocation("https://single-logout-url-post");
+			bu.setResponseLocation("https://single-logout-url-post/response-location");
 			List<SamlBindingUtils> singleLogoutService = Collections.singletonList(bu);
 			List<String> nameIds = Collections.singletonList(NameIDType.TRANSIENT);
 			SamlAssertionConsumerServiceUtil defaultAssertionConsumer = new SamlAssertionConsumerServiceUtil();
@@ -123,6 +124,96 @@ public class SamlGenerationTest {
 			logger.error("Errore nella creazione del metadata", e);
 		}
 	}
+	@Test
+	public void creaSpMetadataAggregatoAmbienteTest() {
+		try {
+			SpSoggettoAggregatoreMetadataBuilder spBuilder = SpSoggettoAggregatoreMetadataBuilder.getInstance();
+			String entityId = "https://entity-id-aggregatore/pub-ag-full/TEST";
+			boolean wantAuthnRequestSigned = true;
+			boolean wantAssertionsSigned = true;
+			String supportedProtocol = "urn:oasis:names:tc:SAML:2.0:protocol";
+			//Carico il p12 (può avere estensione p12 o pfx) e utilizzo questo per i cerficati
+			String pwd = "esempio.certificato";
+			String alias = null;
+
+			InputStream is = new FileInputStream(new File("certificate/esempio.pfx"));
+			KeyStore ks = KeyStore.getInstance("PKCS12");
+			ks.load(is, pwd.toCharArray());
+			List<String> result = new ArrayList<String>();
+			Enumeration<String> aliases = ks.aliases();
+			//Considero la presenza di un solo alias nel pfx
+			while (aliases.hasMoreElements()) {
+				alias = (String) aliases.nextElement();
+				Certificate[] certs = ks.getCertificateChain(alias);
+				if( certs != null && certs.length > 0 ) {
+					for (int i = 0; i < certs.length; i++) {
+						X509Certificate certificato = (X509Certificate)certs[i];
+						String base64 = new String(Base64.encodeBase64(certificato.getEncoded()));
+						result.add(base64);
+					}
+				}
+			}
+			SamlBindingUtils bu = new SamlBindingUtils();
+			bu.setBindingType(SamlBindingTypes.POST);
+			bu.setLocation("https://single-logout-url-post");
+			bu.setResponseLocation("https://single-logout-url-post/response-location");
+			List<SamlBindingUtils> singleLogoutService = Collections.singletonList(bu);
+			List<String> nameIds = Collections.singletonList(NameIDType.TRANSIENT);
+			SamlAssertionConsumerServiceUtil defaultAssertionConsumer = new SamlAssertionConsumerServiceUtil();
+			defaultAssertionConsumer.setDefaultElement(true);
+			defaultAssertionConsumer.setIndex(0);
+			SamlBindingUtils assertionConumerBinding = new SamlBindingUtils();
+			assertionConumerBinding.setBindingType(SamlBindingTypes.POST);
+			assertionConumerBinding.setLocation("https://assertion-consumer-binding-post");
+			assertionConumerBinding.setResponseLocation("https://assertion-consumer-binding-post/response-location");
+			defaultAssertionConsumer.setSamlBinding(assertionConumerBinding);
+			List<SamlAssertionConsumerServiceUtil> assertionConsumerServices = Collections.singletonList(defaultAssertionConsumer);
+			SamlOrganizationDto organization = new SamlOrganizationDto();
+			organization.setOrganizationDisplayName("Organizzazione fittizia per il collaudo");
+			organization.setOrganizationName("Organizzazione fittizia per il collaudo");
+			organization.setOrganizationUrl("https://organization-url/");
+			SamlOtherContactPerson otherContactPerson = new SamlOtherContactPerson();
+			otherContactPerson.setSpPubblico(true);
+			otherContactPerson.setEmailAddress("spid@spid.it");
+			//otherContactPerson.setFiscalCode("fiscal code");
+			otherContactPerson.setIpaCode("ipa");
+			//otherContactPerson.setTelephoneNumber("teelfono");
+			SamlOtherContactPerson informazioniSoggettoAggregatore = new SamlOtherContactPerson();
+			informazioniSoggettoAggregatore.setCompanyName("Company name");
+			informazioniSoggettoAggregatore.setSpPubblico(true);
+			informazioniSoggettoAggregatore.setIpaCode("ipa");
+			informazioniSoggettoAggregatore.setEmailAddress("spid@spid2.it");
+//			informazioniSoggettoAggregatore.setVatNumber(alias);
+//			informazioniSoggettoAggregatore.setFiscalCode(alias);
+			SamlOtherContactPerson informazioniSoggettoAggregato = new SamlOtherContactPerson();
+			informazioniSoggettoAggregato.setCompanyName("Oganizzazione fittizia per il collaudo");
+			informazioniSoggettoAggregato.setIpaCode("__aggrsint");
+			informazioniSoggettoAggregato.setSpPubblico(true);
+			EntityDescriptor spEntityDescr = spBuilder.buildSpMetadata(	entityId, 
+					wantAuthnRequestSigned, 
+					wantAssertionsSigned, 
+					supportedProtocol, 
+					result, 
+					result, 
+					singleLogoutService, 
+					nameIds, 
+					assertionConsumerServices, 
+					organization, 
+					informazioniSoggettoAggregatore,
+					informazioniSoggettoAggregato, 
+					null,
+					AgidUtils.agidSpidEidasAttributes(),
+					false);
+			String xmlSp = OpenSAMLUtils.samlObjectToString(spEntityDescr);
+			PrivateKey privateKey = (PrivateKey) ks.getKey(alias, pwd.toCharArray());
+			X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
+			OpenSAMLUtils.signSamlObj(spEntityDescr, privateKey, cert);
+			String xmlSpFirmato = OpenSAMLUtils.samlObjectToString(spEntityDescr);
+			logger.info("File originale {}. File firmato {}",xmlSp, xmlSpFirmato);
+		} catch (Exception e) {
+			logger.error("Errore nella creazione del metadata", e);
+		}
+	}			
 	@Test
 	public void creaSpMetadataEntePrivato() {
 		try {

@@ -218,9 +218,6 @@ public class SpSoggettoAggregatoreMetadataBuilder extends AbstractMetadataBuilde
 				extensions.getUnknownXMLObjects().add(builder.buildObject(SPID_NS_URI,"Public",SPID_NS_PREFIX));
 			}
 		}
-		if( StringUtil.isEmptyString(spidAggregator.getEmailAddress()) ) {
-			throw new IllegalArgumentException("L'indirizzo mail dell'aggregatore non può essere nullo");
-		}
 		if( !StringUtil.isEmptyString(spidAggregator.getEmailAddress()) ) {
 			EmailAddress mailAggregatore = OpenSAMLUtils.buildSAMLObject(EmailAddress.class);
 			mailAggregatore.setAddress(spidAggregator.getEmailAddress());
