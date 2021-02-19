@@ -1,7 +1,10 @@
 spid_metadata_generator
 =======================
 
-Semplice progetto basato su Java e OpenSAML 3 che consente di: - generare il metadata per un ServiceProvider (SP) firmato pubblico - generare il metadata per un Aggregato nel caso di soggetto aggregatore full di servizi pubblici - generare il metadata per un ServiceProvider privato
+Semplice progetto basato su Java e OpenSAML 3 che consente di: 
+- generare il metadata per un ServiceProvider (SP) firmato pubblico 
+- generare il metadata per un Aggregato nel caso di soggetto aggregatore full di servizi pubblici 
+- generare il metadata per un ServiceProvider privato
 
 La classe `it.agid.spid.saml.core.utils.SpidControlChecker` contiene tutti i controlli spid da effettuare sulla saml response ad eccezione del controllo su in responseTo
 
